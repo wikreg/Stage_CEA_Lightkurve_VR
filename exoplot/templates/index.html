@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exoplot</title>
+
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+
+    <header>
+    <div class="logo">
+        <span class="logo-image" data-tooltip="Logo by A.Wittmann">
+            <img src="{{ url_for('static', filename='images/logo_detailed.png') }}" alt="Logo"/>
+        </span>
+        <a href="{{ url_for('index') }}">Exoplot</a>
+    </div>
+
+    <nav class="nav-links">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('analyse') }}">Analyse</a>
+        <a href="{{ url_for('discover') }}">Discover</a>
+    </nav>
+
+    <div class="header-icons">
+        <a href="https://github.com/SimonWtmn/Exoplot" target="_blank" aria-label="GitHub" data-tooltip="GitHub">
+        <i data-lucide="github"></i>
+        </a>
+        <a href="https://www.linkedin.com/in/simon-wittmann-47499a283/" target="_blank" aria-label="LinkedIn" data-tooltip="LinkedIn">
+        <i data-lucide="linkedin"></i>
+        </a>
+        <a href="https://lightkurve.github.io/lightkurve/" target="_blank" aria-label="Lightkurve" data-tooltip="Lightkurve">
+        <i data-lucide="book-open"></i>
+        </a>
+        <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" aria-label="NASA Exoplanet Archive" data-tooltip="NASA Exoplanet Archive">
+        <i data-lucide="globe"></i>
+        </a>
+    </div>
+    </header>
+
+  <main class="hero">
+    <h1>Explore Exoplanets Visually</h1>
+    <p>
+      Exoplot helps astronomers and data scientists create beautiful, interactive visualizations
+      from exoplanetary datasets. Pick your layout, apply presets, and dive into the universe.
+    </p>
+    <div class="button-group">
+      <a href="{{ url_for('analyse') }}" class="primary-btn">Analyse</a>
+      <a href="{{ url_for('discover') }}" class="secondary-btn">Discover</a>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='script/script.js') }}"></script>
+
+</body>
+</html>

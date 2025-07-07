@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{{ target }}</title>
+
+<link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+
+  <header>
+  <div class="logo">
+      <span class="logo-image" data-tooltip="Logo by A.Wittmann">
+          <img src="{{ url_for('static', filename='images/logo_detailed.png') }}" alt="Logo"/>
+      </span>
+      <a href="{{ url_for('index') }}">{{ target }}</a>
+  </div>
+
+  <nav class="nav-links">
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('analyse') }}">Analyse</a>
+      <a href="{{ url_for('discover') }}">Discover</a>
+  </nav>
+
+  <div class="header-icons">
+      <a href="{{ url_for('download', row=row, target=target, format='csv') }}" aria-label="Download Lightcurve CSV" data-tooltip="Download CSV">
+      <i data-lucide="download"></i>
+      </a>
+      <a href="https://github.com/SimonWtmn/Exoplot" target="_blank" aria-label="GitHub" data-tooltip="GitHub">
+      <i data-lucide="github"></i>
+      </a>
+      <a href="https://www.linkedin.com/in/simon-wittmann-47499a283/" target="_blank" aria-label="LinkedIn" data-tooltip="LinkedIn">
+      <i data-lucide="linkedin"></i>
+      </a>
+      <a href="https://lightkurve.github.io/lightkurve/" target="_blank" aria-label="Lightkurve" data-tooltip="Lightkurve">
+      <i data-lucide="book-open"></i>
+      </a>
+      <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" aria-label="NASA Exoplanet Archive" data-tooltip="NASA Exoplanet Archive">
+      <i data-lucide="globe"></i>
+      </a>
+  </header>
+
+  <main class="hero lightcurve-page">
+    <div class="tab-strip">
+      <div class="tab" data-tab="folded" onclick="showTab('folded')">Folded Lightcurve</div>
+      <div class="tab" data-tab="raw" onclick="showTab('raw')">Raw Lightcurve</div>
+      <div class="tab" data-tab="periodogram" onclick="showTab('periodogram')">Periodogram</div>
+      <div class="tab" data-tab="mcmc" onclick="showTab('mcmc')">MCMC</div>
+      <div class="tab-underline"></div>
+    </div>
+
+    <div id="raw" class="tab-content tab-card" style="display:none">
+      {{ raw_html|safe }}
+    </div>
+
+    <div id="periodogram" class="tab-content tab-card" style="display:none">
+      <div class="periodogram-grid">
+        <div class="periodogram-plots">
+          <div class="periodogram-plot">
+            {{ pg_period_html|safe }}
+          </div>
+          <div class="periodogram-plot">
+            {{ pg_freq_html|safe }}
+          </div>
+        </div>
+
+        <div class="periodogram-info">
+          <div class="info-card">
+            <h3>Best Fit Parameters</h3>
+            <p><strong>Best Period :</strong> {{ best_period }} days</p>
+            <p><strong>Best Frequency :</strong> {{ best_freq }} days⁻¹</p>
+            <p><strong>Max Power :</strong> {{ best_power }}</p>
+            <p><strong>Epoch Time :</strong> {{ epoch_time }} julian days</p>
+            <p><strong>Transit Time :</strong> {{ transit_time }} days</p>
+            <p><strong>Transit Depth :</strong> {{ transit_depth }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="folded" class="tab-content tab-card">
+      <div id="folded-figure">
+        {{ folded_html|safe }}
+      </div>
+
+      <div class="refold-controls">
+        <form method="get" id="refold-form">
+          <input type="hidden" name="target" value="{{ target }}">
+          <input type="hidden" name="row" value="{{ row }}">
+          <input type="number" name="harmonic" placeholder="Enter harmonic">
+          <button type="submit" class="tab-button">Refold</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="mcmc" class="tab-content tab-card" style="display:none">
+      <button class="tab-button" id="mcmc-button">Run MCMC</button>
+      <div id="mcmc-loading" style="display:none;">
+        <p>Running MCMC, please wait…</p>
+        <div class="progress-bar-container">
+          <div id="mcmc-progress-bar" class="progress-bar" style="width:0%;"></div>
+        </div>
+      </div>
+
+      <div id="mcmc-result" style="display:none;">
+        <h3>Best-Fit Folded Lightcurve</h3>
+        <div id="mcmc-lc"></div>
+
+        <h3>Parameter Estimates</h3>
+        <div class="info-card" id="mcmc-params"></div>
+
+        <h3>MCMC Diagnostics</h3>
+        <div class="periodogram-grid">
+          <div class="periodogram-plots">
+            <div class="periodogram-plot" id="mcmc-trace"></div>
+            <div class="periodogram-plot" id="mcmc-corner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+
+<script src="{{ url_for('static', filename='script/script.js') }}"></script>
+<script src="http://127.0.0.1:35729/livereload.js"></script>
+
+</body>
+</html>

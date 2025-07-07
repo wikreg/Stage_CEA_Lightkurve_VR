@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Discover | Exoplot</title>
+
+<link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<header>
+    <div class="logo">
+        <span class="logo-image" data-tooltip="Logo by A.Wittmann">
+            <img src="{{ url_for('static', filename='images/logo_detailed.png') }}" alt="Logo"/>
+        </span>
+        <a href="{{ url_for('index') }}">Exoplot</a>
+    </div>
+
+    <nav class="nav-links">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('analyse') }}">Analyse</a>
+        <a href="{{ url_for('discover') }}">Discover</a>
+    </nav>
+
+    <div class="header-icons">
+        <a href="https://github.com/SimonWtmn/Exoplot" target="_blank" aria-label="GitHub" data-tooltip="GitHub">
+        <i data-lucide="github"></i>
+        </a>
+        <a href="https://www.linkedin.com/in/simon-wittmann-47499a283/" target="_blank" aria-label="LinkedIn" data-tooltip="LinkedIn">
+        <i data-lucide="linkedin"></i>
+        </a>
+        <a href="https://lightkurve.github.io/lightkurve/" target="_blank" aria-label="Lightkurve" data-tooltip="Lightkurve">
+        <i data-lucide="book-open"></i>
+        </a>
+        <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" aria-label="NASA Exoplanet Archive" data-tooltip="NASA Exoplanet Archive">
+        <i data-lucide="globe"></i>
+        </a>
+    </div>
+</header>
+
+<main class="discover-main">
+  <div>
+    <h1>Discover Exoplanet Data</h1>
+    <p>Search for a target by name, ID, or coordinates to see available light curves.</p>
+  </div>
+
+  <form class="discover-form" method="post">
+    <!-- Search bar -->
+    <div class="search-wrapper">
+      <input
+        type="text"
+        name="target"
+        placeholder="e.g. Kepler-10 or 19:02:43.1 +50:14:28.7"
+        value="{{ target|default('') }}"
+        required
+      />
+      <button type="submit">Search</button>
+    </div>
+
+    <!-- General options -->
+    <fieldset>
+      <legend>General Options</legend>
+
+      <label>
+        Mission:
+        <select name="mission" id="mission">
+          <option value="">Any</option>
+          <option value="Kepler">Kepler</option>
+          <option value="K2">K2</option>
+          <option value="TESS">TESS</option>
+        </select>
+      </label>
+
+      <label>
+        Cadence:
+        <select name="cadence">
+          <option value="">Any</option>
+          <option value="long">Long</option>
+          <option value="short">Short</option>
+        </select>
+      </label>
+
+      <label>
+        Exposure Time (seconds):
+        <input type="number" name="exptime" min="1" placeholder="e.g. 120">
+      </label>
+
+      <label>
+        Radius (arcsec):
+        <input type="number" name="radius" min="1" placeholder="e.g. 10">
+      </label>
+
+      <label>
+        Author:
+        <input type="text" name="author" placeholder="e.g. SPOC">
+      </label>
+
+      <label>
+        Limit:
+        <input type="number" name="limit" min="1" placeholder="e.g. 50">
+      </label>
+    </fieldset>
+
+    <!-- Mission-specific options -->
+    <fieldset id="mission-specific">
+      <legend>Mission-Specific Options</legend>
+
+      <!-- Kepler / K2 -->
+      <div data-mission="Kepler K2">
+        <label>
+          Quarter:
+          <input type="number" name="quarter" min="0" placeholder="e.g. 12">
+        </label>
+
+        <label>
+          Campaign:
+          <input type="number" name="campaign" min="0" placeholder="e.g. 5">
+        </label>
+
+        <label>
+          Month:
+          <input type="number" name="month" min="0" placeholder="e.g. 2">
+        </label>
+      </div>
+
+      <!-- TESS -->
+      <div data-mission="TESS">
+        <label>
+          Sector:
+          <input type="number" name="sector" min="0" placeholder="e.g. 14">
+        </label>
+      </div>
+    </fieldset>
+  </form>
+
+
+  <div id="loading-message" style="display:none; text-align:center; margin-top:20px;">
+    <div class="orbit">
+      <div class="planet"></div>
+      <div class="star"></div>
+    </div>
+    <p>Searching the skies for lightcurves…</p>
+  </div>
+
+  {% if results %}
+    <div class="results-table">
+      <h2 class="results-heading">Available Light Curves for "{{ target }}"</h2>
+        {{ results|safe }}
+    </div>
+  {% endif %}
+</main>
+
+<script src="{{ url_for('static', filename='script/script.js') }}"></script>
+
+</body>
+</html>

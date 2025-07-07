@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Single Plot Layout</title>
+
+<link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<header>
+  <div class="logo">
+      <span class="logo-image" data-tooltip="Logo by A.Wittmann">
+          <img src="{{ url_for('static', filename='images/logo_detailed.png') }}" alt="Logo"/>
+      </span>
+      <a href="{{ url_for('index') }}">Single Layout</a>
+  </div>
+
+  <nav class="nav-links">
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('analyse') }}">Analyse</a>
+      <a href="{{ url_for('discover') }}">Discover</a>
+  </nav>
+
+  <div class="header-icons">
+      <a href="https://github.com/SimonWtmn/Exoplot" target="_blank"><i data-lucide="github"></i></a>
+      <a href="https://www.linkedin.com/in/simon-wittmann-47499a283/" target="_blank"><i data-lucide="linkedin"></i></a>
+      <a href="https://lightkurve.github.io/lightkurve/" target="_blank"><i data-lucide="book-open"></i></a>
+      <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank"><i data-lucide="globe"></i></a>
+  </div>
+</header>
+
+<main class="hero lightcurve-page">
+
+  <div class="tab-strip">
+    <div class="tab" data-tab="type" onclick="showTab('type')">Plot Type</div>
+    <div class="tab" data-tab="presets" onclick="showTab('presets')">Presets</div>
+    <div class="tab" data-tab="models" onclick="showTab('models')">Models</div>
+    <div class="tab" data-tab="highlight" onclick="showTab('highlight')">Highlight Planets</div>
+    <div class="tab" data-tab="details" onclick="showTab('details')">Details</div>
+    <div class="tab-underline"></div>
+  </div>
+
+  <form id="plot-config-form">
+
+  <div id="type" class="tab-content tab-card">
+    <h3>Select Plot Type</h3>
+
+    <div class="grid" id="plot-type-grid">
+      <div class="card plot-type-card" data-plot="scatter">
+        <img src="{{ url_for('static', filename='images/plot_scatter.png') }}" alt="Scatter">
+        <div class="card-title">Scatter</div>
+      </div>
+
+      <div class="card plot-type-card" data-plot="colored">
+        <img src="{{ url_for('static', filename='images/plot_colored.png') }}" alt="Colored Scatter">
+        <div class="card-title">Colored</div>
+      </div>
+
+      <div class="card plot-type-card" data-plot="density">
+        <img src="{{ url_for('static', filename='images/plot_density.png') }}" alt="Density">
+        <div class="card-title">Density</div>
+      </div>
+
+      <div class="card plot-type-card" data-plot="histogram">
+        <img src="{{ url_for('static', filename='images/plot_histogram.png') }}" alt="Histogram">
+        <div class="card-title">Histogram</div>
+      </div>
+
+      <input type="hidden" name="plot_type" id="plot-type-selected">
+    </div>
+
+
+    <div id="presets" class="tab-content tab-card" style="display:none">
+      <h3>Choose Presets</h3>
+      <!-- content you will define -->
+    </div>
+
+    <div id="models" class="tab-content tab-card" style="display:none">
+      <h3>Select Models</h3>
+      <!-- content you will define -->
+    </div>
+
+    <div id="highlight" class="tab-content tab-card" style="display:none">
+      <h3>Highlight Planets</h3>
+      <!-- content you will define -->
+    </div>
+
+    <div id="details" class="tab-content tab-card" style="display:none">
+      <h3>Plot Details</h3>
+      <!-- content you will define -->
+    </div>
+
+    <div class="actions" style="margin-top: 2rem; text-align:center;">
+      <div class="button-row">
+        <button id="apply-btn" class="tab-button">Apply</button>
+        <button id="reset-btn" class="tab-button">Reset</button>
+      </div>
+      <button type="button" id="back-btn" class="secondary-btn" style="display:none;">Back</button>
+    </div>
+
+  </form>
+
+  <div id="plot-output" style="display:none; margin-top:2rem;">
+    <!-- Here the Plotly figure or image will appear -->
+  </div>
+
+</main>
+
+<script src="{{ url_for('static', filename='script/script.js') }}"></script>
+<script src="http://127.0.0.1:35729/livereload.js"></script>
+
+<script>
+document.getElementById("apply-btn").addEventListener("click", () => {
+  document.getElementById("plot-config-form").style.display = "none";
+  document.getElementById("plot-output").style.display = "";
+  document.getElementById("back-btn").style.display = "";
+
+  // TODO: fetch and render the plot here
+});
+
+document.getElementById("back-btn").addEventListener("click", () => {
+  document.getElementById("plot-output").style.display = "none";
+  document.getElementById("plot-config-form").style.display = "";
+  document.getElementById("back-btn").style.display = "none";
+});
+</script>
+
+</body>
+</html>
