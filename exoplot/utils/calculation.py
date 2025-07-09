@@ -5,6 +5,7 @@ from scipy.optimize import minimize
 from functools import partial
 from .mcmc import log_likelihood
 from .constants import *
+import multiprocessing
 
 
 # ===========================================================
@@ -73,42 +74,26 @@ def combine_callbacks(*callbacks):
     return combined
 
 
-def run_mcmc(time, flux, flux_err, period,
-             ndim=4, nwalkers=32, nsteps=5000, progress_callback=None):
-    """
-    Run MCMC to fit transit parameters.
+def run_mcmc(time, flux, flux_err, period, ndim=4, nwalkers=32, nsteps=5000, progress_callback=None):
 
-    Returns dict:
-        - 'results': median & uncertainties per parameter
-        - 'sampler': emcee sampler object
-        - 'flat_samples': flattened posterior samples
-        - 'labels': list of parameter names
-        - 'best_fit': parameters from initial optimization
-    """
     loglike = partial(log_likelihood, time=time, flux=flux, flux_err=flux_err, period=period)
-
-    # Find best-fit parameters
     best_fit = optimize_initial_guess(loglike)
-
-    # Initialize walkers near best-fit
     p0 = best_fit + 1e-3 * np.random.randn(nwalkers, ndim)
 
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike)
+    # Use ~90% of your CPU cores
+    num_cores = max(1, int(multiprocessing.cpu_count() * 0.5))
 
-    # Combine terminal and passed-in callback
-    combined_callback = combine_callbacks(progress_callback, terminal_progress_callback)
+    with multiprocessing.Pool(num_cores) as pool:
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike, pool=pool)
 
-    # Run MCMC iteratively to report progress
-    for step, _ in enumerate(sampler.sample(p0, iterations=nsteps, progress=False)):
-        if step % 10 == 0:
-            combined_callback(step, nsteps)
+        combined_callback = combine_callbacks(progress_callback, terminal_progress_callback)
+        for step, _ in enumerate(sampler.sample(p0, iterations=nsteps, progress=False)):
+            if step % 10 == 0:
+                combined_callback(step, nsteps)
 
-    combined_callback(nsteps, nsteps)  # ensure it reaches 100% at end
+        combined_callback(nsteps, nsteps)
+        flat_samples = sampler.get_chain(discard=100, thin=10, flat=True)
 
-    # Flatten chain
-    flat_samples = sampler.get_chain(discard=100, thin=10, flat=True)
-
-    # Summarize results
     results = compute_summary(flat_samples)
 
     return {

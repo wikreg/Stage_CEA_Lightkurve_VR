@@ -9,6 +9,7 @@ import lightkurve as lk
 import pandas as pd
 import numpy as np
 import tempfile, threading, uuid
+import multiprocessing
 
 from utils.plotting import *
 from utils.calculation import run_mcmc
@@ -261,6 +262,24 @@ def refold():
 progress_store = {}
 result_store = {}
 
+def update_progress(task_id, step, total):
+    progress_store[task_id] = step / total
+
+def mcmc_worker(task_id, time_jd, flux_val, flux_err, best_period):
+    result = run_mcmc(
+        time_jd, flux_val, flux_err, period=best_period,
+        progress_callback=lambda step, total: update_progress(task_id, step, total)
+    )
+
+    model_time = np.linspace(min(time_jd), max(time_jd), 5000)
+    params = [result['results'][l][0] for l in result['labels']]
+    model_flux = make_transit_model(model_time, params, best_period)
+
+    result_store[task_id] = render_mcmc_results(
+        result, time_jd, flux_val, flux_err, model_time, model_flux, best_period
+    )
+    progress_store[task_id] = 1.0
+
 @app.route("/mcmc")
 def mcmc():
     target = request.args.get("target")
@@ -280,20 +299,12 @@ def mcmc():
     progress_store[task_id] = 0
     result_store[task_id] = None
 
-    def update_progress(step, total):
-        progress_store[task_id] = step / total
-
-    def run_task():
-        result = run_mcmc(time_jd, flux_val, flux_err, period=best_period, progress_callback=update_progress)
-
-        model_time = np.linspace(min(time_jd), max(time_jd), 5000)
-        params = [result['results'][l][0] for l in result['labels']]
-        model_flux = make_transit_model(model_time, params, best_period)
-
-        result_store[task_id] = render_mcmc_results(result, time_jd, flux_val, flux_err, model_time, model_flux, best_period)
-        progress_store[task_id] = 1
-
-    threading.Thread(target=run_task).start()
+    # 🧠 Start in a separate process
+    p = multiprocessing.Process(
+        target=mcmc_worker,
+        args=(task_id, time_jd, flux_val, flux_err, best_period)
+    )
+    p.start()
 
     return jsonify({"task_id": task_id})
 
@@ -318,8 +329,12 @@ def result(task_id):
 # ===========================================================
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.set_start_method("spawn", force=True)  # 🧠 important for Windows/macOS!
+
     from livereload import Server
     server = Server(app.wsgi_app)
     server.watch('static/')
     server.watch('templates/')
     server.serve(port=5000, host='127.0.0.1', debug=True)
+    
